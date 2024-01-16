@@ -28,8 +28,8 @@ pipeline {
             steps {
                 script {
                     // Install dependencies and run tests inside the Docker container
-                    sh "docker exec -it ${DOCKER_CONTAINER_ID} pip install --no-cache-dir -r requirements.txt"
-                    sh "docker exec -it ${DOCKER_CONTAINER_ID} pytest tests"
+                    sh "docker exec ${DOCKER_CONTAINER_ID} pip install --no-cache-dir -r requirements.txt"
+                    sh "docker exec ${DOCKER_CONTAINER_ID} pytest tests"
                 }
             }
         }
