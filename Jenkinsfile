@@ -32,7 +32,7 @@ pipeline {
         }
         failure {
             echo 'Tests failed! Build marked as FAILURE.'
-            currentBuild.result = 'FAILURE'
+            error('Tests failed! Build marked as FAILURE.')
         }
     }
 }
