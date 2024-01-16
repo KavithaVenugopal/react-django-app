@@ -15,8 +15,8 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Use sudo to run Docker commands
-                    sh 'sudo /var/lib/docker build -t reactdjan1 .'
+                    //  Docker commands
+                    sh '/var/lib/docker build -t reactdjan1 .'
                 }
             }
         }
