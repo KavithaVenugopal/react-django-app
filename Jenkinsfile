@@ -36,30 +36,41 @@ pipeline {
     }
 
    post {
-        always {
-            script {
-                // Print the contents of the workspace for debugging
-                sh 'ls -R'
+    success {
+        script {
+            // Print the contents of the workspace for debugging
+            sh 'ls -R'
+            
+            // Find and print the test result files
+            def testResultFiles = findFiles(glob: 'test-reports/**/*.xml')
+            echo "Test result files found: ${testResultFiles.join(', ')}"
 
-                // Find and print the test result files
-                def testResultFiles = findFiles(glob: 'test-reports/**/*.xml')
-                echo "Test result files found: ${testResultFiles.join(', ')}"
-            }
-            junit 'test-reports/**/*.xml'
-        }
-        success {
             echo 'All tests passed!'
+            echo "Test report path: ${WORKSPACE}/test-reports"
         }
-        failure {
+        junit 'test-reports/**/*.xml'
+    }
+    failure {
+        script {
+            // Print the contents of the workspace for debugging
+            sh 'ls -R'
+
+            // Find and print the test result files
+            def testResultFiles = findFiles(glob: 'test-reports/**/*.xml')
+            echo "Test result files found: ${testResultFiles.join(', ')}"
+
             echo 'Tests failed! Build marked as FAILURE.'
             error('Tests failed! Build marked as FAILURE.')
+            echo "Test report path: ${WORKSPACE}/test-reports"
         }
-        cleanup {
-            // Stop and remove the Docker container after the tests
-            script {
-                sh "docker stop ${DOCKER_CONTAINER_ID}"
-                sh "docker rm ${DOCKER_CONTAINER_ID}"
-            }
+        junit 'test-reports/**/*.xml'
+    }
+    cleanup {
+        // Stop and remove the Docker container after the tests
+        script {
+            sh "docker stop ${DOCKER_CONTAINER_ID}"
+            sh "docker rm ${DOCKER_CONTAINER_ID}"
         }
     }
 }
+
