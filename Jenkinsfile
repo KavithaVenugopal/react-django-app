@@ -36,9 +36,16 @@ pipeline {
     }
 
     post {
-        always {
-            junit 'test-reports/**/*.xml'
+    always {
+        script {
+            // Print the contents of the workspace for debugging
+        sh 'ls -R'
+            // Find and print the test result files
+            def testResultFiles = findFiles(glob: 'test-reports/**/*.xml')
+            echo "Test result files found: ${testResultFiles.join(', ')}"
         }
+        junit 'test-reports/**/*.xml'
+    }
         success {
             echo 'All tests passed!'
         }
