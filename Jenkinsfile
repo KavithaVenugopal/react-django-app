@@ -15,8 +15,8 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Build Docker image with the project files
-                    docker.build 'reactdjan1'
+                    // Use sudo to run Docker commands
+                    sh 'sudo /var/lib/docker build -t reactdjan1 .'
                 }
             }
         }
@@ -25,9 +25,12 @@ pipeline {
             steps {
                 script {
                     // Run tests in the Docker container
-                    docker.image('reactdjan1').inside {
-                        sh 'pip install --upgrade pip && pip install -r requirements.txt'
-                        sh 'pytest tests'
+                    // Explicitly set the PATH to include the directory where Docker is installed
+                    withEnv(['PATH=/var/lib:$PATH']) {
+                        docker.image('reactdjan1').inside {
+                            sh 'pip install --upgrade pip && pip install -r requirements.txt'
+                            sh 'pytest tests'
+                        }
                     }
                 }
             }
@@ -43,7 +46,7 @@ pipeline {
         }
         failure {
             echo 'Tests failed! Build marked as FAILURE.'
-            error('Tests failed! Build marked as FAILURE.')  // Use error() to mark the build as failed
+            error('Tests failed! Build marked as FAILURE.')
         }
     }
 }
