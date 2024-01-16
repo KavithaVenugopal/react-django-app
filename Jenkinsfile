@@ -1,9 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'python:3.9'
-        }
-    }
+    agent any
 
     stages {
         stage('Checkout') {
@@ -12,27 +8,17 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build and Run images') {
             steps {
-                script {
-                    //  Docker commands
-                    sh '/var/lib/docker build -t reactdjan1 .'
-                }
+                sh 'docker build -t kavitha/react .'
+                sh 'docker run -p 8000:8000 -d kavitha/react'
             }
         }
 
-        stage('Run Tests in Docker') {
+        stage('Run Tests') {
             steps {
-                script {
-                    // Run tests in the Docker container
-                    // Explicitly set the PATH to include the directory where Docker is installed
-                    withEnv(['PATH=/var/lib:$PATH']) {
-                        docker.image('reactdjan1').inside {
-                            sh 'pip install --upgrade pip && pip install -r requirements.txt'
-                            sh 'pytest tests'
-                        }
-                    }
-                }
+                sh 'pip install --no-cache-dir -r requirements.txt'
+                sh 'pytest tests'
             }
         }
     }
@@ -46,7 +32,7 @@ pipeline {
         }
         failure {
             echo 'Tests failed! Build marked as FAILURE.'
-            error('Tests failed! Build marked as FAILURE.')
+            currentBuild.result = 'FAILURE'
         }
     }
 }
