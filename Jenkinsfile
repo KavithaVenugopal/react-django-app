@@ -10,8 +10,8 @@ pipeline {
 
         stage('Build and Run images') {
             steps {
-                sh 'docker build -t kavitha/react .'
-                sh 'docker run -p 8000:8000 -d kavitha/react'
+                sh '/var/lib/docker build -t kavitha/react .'
+                sh '/var/lib/docker run -p 8000:8000 -v /var/run/docker.sock:/var/run/docker.sock -d kavitha/react'
             }
         }
 
