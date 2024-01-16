@@ -35,43 +35,42 @@ pipeline {
         }
     }
 
-   post {
-    success {
-        script {
-            // Print the contents of the workspace for debugging
-            sh 'ls -R'
-            
-            // Find and print the test result files
-            def testResultFiles = findFiles(glob: 'test-reports/**/*.xml')
-            echo "Test result files found: ${testResultFiles.join(', ')}"
+    post {
+        success {
+            script {
+                // Print the contents of the workspace for debugging
+                sh 'ls -R'
+                
+                // Find and print the test result files
+                def testResultFiles = findFiles(glob: 'test-reports/**/*.xml')
+                echo "Test result files found: ${testResultFiles.join(', ')}"
 
-            echo 'All tests passed!'
-            echo "Test report path: ${WORKSPACE}/test-reports"
+                echo 'All tests passed!'
+                echo "Test report path: ${WORKSPACE}/test-reports"
+            }
+            junit 'test-reports/**/*.xml'
         }
-        junit 'test-reports/**/*.xml'
-    }
-    failure {
-        script {
-            // Print the contents of the workspace for debugging
-            sh 'ls -R'
+        failure {
+            script {
+                // Print the contents of the workspace for debugging
+                sh 'ls -R'
 
-            // Find and print the test result files
-            def testResultFiles = findFiles(glob: 'test-reports/**/*.xml')
-            echo "Test result files found: ${testResultFiles.join(', ')}"
+                // Find and print the test result files
+                def testResultFiles = findFiles(glob: 'test-reports/**/*.xml')
+                echo "Test result files found: ${testResultFiles.join(', ')}"
 
-            echo 'Tests failed! Build marked as FAILURE.'
-            error('Tests failed! Build marked as FAILURE.')
-            echo "Test report path: ${WORKSPACE}/test-reports"
+                echo 'Tests failed! Build marked as FAILURE.'
+                error('Tests failed! Build marked as FAILURE.')
+                echo "Test report path: ${WORKSPACE}/test-reports"
+            }
+            junit 'test-reports/**/*.xml'
         }
-        junit 'test-reports/**/*.xml'
-    }
-    cleanup {
-        // Stop and remove the Docker container after the tests
-        script {
-            sh "docker stop ${DOCKER_CONTAINER_ID}"
-            sh "docker rm ${DOCKER_CONTAINER_ID}"
+        cleanup {
+            // Stop and remove the Docker container after the tests
+            script {
+                sh "docker stop ${DOCKER_CONTAINER_ID}"
+                sh "docker rm ${DOCKER_CONTAINER_ID}"
+            }
         }
     }
-}
-}
 }
