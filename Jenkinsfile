@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_CONTAINER_ID = ''
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -10,15 +14,23 @@ pipeline {
 
         stage('Build and Run images') {
             steps {
-                sh '/var/lib/docker build -t kavitha/react .'
-                sh '/var/lib/docker run -p 8000:8000 -v /var/run/docker.sock:/var/run/docker.sock -d kavitha/react'
+                script {
+                    // Build Docker image
+                    sh 'docker build -t kavitha/react .'
+
+                    // Run Docker container and capture the container ID
+                    DOCKER_CONTAINER_ID = sh(script: 'docker run -p 8000:8000 -d kavitha/react', returnStdout: true).trim()
+                }
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh 'pip install --no-cache-dir -r requirements.txt'
-                sh 'pytest tests'
+                script {
+                    // Install dependencies and run tests inside the Docker container
+                    sh "docker exec -it ${DOCKER_CONTAINER_ID} pip install --no-cache-dir -r requirements.txt"
+                    sh "docker exec -it ${DOCKER_CONTAINER_ID} pytest tests"
+                }
             }
         }
     }
@@ -34,6 +46,12 @@ pipeline {
             echo 'Tests failed! Build marked as FAILURE.'
             error('Tests failed! Build marked as FAILURE.')
         }
+        cleanup {
+            // Stop and remove the Docker container after the tests
+            script {
+                sh "docker stop ${DOCKER_CONTAINER_ID}"
+                sh "docker rm ${DOCKER_CONTAINER_ID}"
+            }
+        }
     }
 }
-
